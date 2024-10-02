@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+<!--    <meta http-equiv="Content-Security-Policy" content="script-src 'self';">-->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>maxGraph TypeScript Integration with Vite (custom shapes)</title>
+    <script type="module" src="/src/main.ts"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: Arial, sans-serif;
+            color: #fff;
+
+        }
+
+        .container {
+            display: flex;
+            height: 100vh; /* Full height of the viewport */
+        }
+
+        .sidebar {
+            width: 200px; /* Fixed width for sidebars */
+            /*background-color: #333;*/
+        }
+
+        .left-sidebar {
+            background-color: #444;
+        }
+
+        .right-sidebar {
+            width: 700px;
+            background-color: #555;
+        }
+
+        .main-content {
+            flex: 1; /* Takes up the remaining width */
+            /*overflow-y: auto; !* Makes the content scrollable if it overflows vertically *!*/
+            /*background-color: #f4f4f4;*/
+        }
+        /* Basic styling for the toolbar */
+        #toolbar {
+            display: flex;
+            flex-direction: column; /* Vertical layout by default */
+            width: 220px;
+            /*background-color: #f0f0f0;*/
+            border-right: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        /* Subsection styling */
+        .toolbar-section {
+            margin-bottom: 20px;
+        }
+
+        .toolbar-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .toolbar-items {
+            display: flex;
+            flex-direction: row; /* Change to column for vertical icons */
+            flex-wrap: wrap;
+        }
+
+        .toolbar-item {
+            margin: 5px;
+            padding: 5px;
+            background-color: white;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            text-align: center;
+            width: 50px; /* Fixed width for the icons */
+            height: 50px;
+        }
+
+        .toolbar-item img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        #monaco-editor {
+            margin-top: 20px;
+            width: 100%;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="sidebar left-sidebar">
+        <div id="toolbar">
+            <div class="toolbar-section">
+                <div class="toolbar-title">Rest api</div>
+                <div class="toolbar-items" id="rest-api">
+                    <!-- Icons for REST api will be added here -->
+                </div>
+            </div>
+            <div class="toolbar-section">
+                <div class="toolbar-title">Localstorage</div>
+                <div class="toolbar-items" id="localstorage">
+                    <!-- Icons for localstorage will be added here -->
+                </div>
+            </div>
+            <div class="toolbar-section">
+                <div class="toolbar-title">Mapper</div>
+                <div class="toolbar-items" id="mapping">
+                    <!-- Icons for mappers will be added here -->
+                </div>
+            </div>
+            <div class="toolbar-section">
+                <div class="toolbar-title">Eventing</div>
+                <div class="toolbar-items" id="eventing">
+                    <!-- Icons for mappers will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <div id="graphContainer" style="width:100%; height:600px;border:1px solid #ccc;"></div>
+    </div>
+    <div class="sidebar right-sidebar">
+        <div>
+            <button id="initPipeline">Init pipeline</button>
+            <button id="pipeline-next">Next</button>
+            <button id="getGraphAsJson">Get graph as json</button>
+            <button id="btn-function">validate function</button>
+        </div>
+        <div>
+            <button id="btn-generator">Start pipeline</button>
+            <button id="btn-generator-next">Next</button>
+            <button id="btn-test">Test</button>
+        </div>
+        <div>
+            <button id="btn-npm-install">Npm install</button>
+            <button id="btn-npm-list">Npm list</button>
+            <button id="btn-npm-types">npm types lodash</button>
+            <button id="btn-ts-emit">trigger emit</button>
+        </div>
+        <div>
+            <button id="btn-es-build">EsBuild bundle</button>
+        </div>
+        <div id="monaco-editor"></div>
+    </div>
+</div>
+
+<!--<div id="graph-container">-->
+    <div id="ball"></div>
+<!--</div>-->
+<!--<button id="initPipeline">Trigger Animation</button>-->
+<footer></footer>
+</body>
+</html>
+

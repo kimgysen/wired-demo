@@ -1,0 +1,97 @@
+In maxGraph (and its predecessor mxGraph), when implementing foldable parent vertices, the behavior of child vertices' coordinates and the resizing of parent vertices work as follows:
+
+1. Coordinates of Child Vertices within a Parent
+Relative Coordinates: The x and y coordinates of child vertices are relative to the parent vertex. This means that if a vertex is inside a parent (which acts as a group or container), its position is defined relative to the top-left corner of the parent.
+Global Coordinates: When there is no parent (i.e., the vertex is placed directly on the graph canvas), the x and y coordinates are relative to the overall graph canvas.
+If you move or fold the parent, the child vertices’ relative positions will stay the same within the parent. However, when rendering them on the canvas, maxGraph will compute their global positions by considering the parent’s position.
+
+2. Automatic Resizing of Parent Vertices
+Parent Size Scaling: By default, the size of the parent vertex does not automatically scale when it is expanded or collapsed. You need to manage this manually if you want the parent to automatically adjust its size to fit its children.
+To achieve auto-resizing of parent vertices, you can enable the feature by setting the resizeParent property in the graph settings. This will ensure that the parent’s size adjusts dynamically to fit all its children.
+
+Here's how you can configure the parent to resize automatically:
+
+javascript
+Copy code
+graph.setResizeParent(true); // Automatically resize the parent to fit children
+graph.setResizeParentOnAdd(true); // Resizes when children are added
+graph.setCollapseToPreferredSize(true); // Collapse the parent to its preferred size when folded
+3. Folding Behavior (Expanding/Collapsing Parents)
+When a parent vertex is collapsed or expanded, maxGraph manages the display of the child vertices automatically:
+
+Collapsed: The child vertices are hidden, and the parent vertex is shown in a collapsed form.
+Expanded: The child vertices are displayed, and the parent vertex returns to its expanded form.
+If you want to adjust the size of the parent vertex when it’s collapsed or expanded, you can use the following configuration:
+
+javascript
+Copy code
+graph.isCellFoldable = function(cell) {
+    return true; // Enable folding for parent cells
+};
+
+graph.getFoldingImage = function(state) {
+    return state.cell.isCollapsed() ? new mxImage('expand-icon.png', 16, 16) : new mxImage('collapse-icon.png', 16, 16);
+};
+Summary:
+Coordinates of Child Vertices: The x and y values of child vertices are relative to the parent vertex when placed inside a parent. These coordinates are local to the parent, not the overall graph.
+Resizing of Parent Vertices: The size of the parent does not scale automatically when expanded or collapsed by default. You can enable automatic resizing by setting resizeParent and other related properties to make the parent adjust its size dynamically based on its children.
+If you need specific behavior when expanding/collapsing, such as changing the size of the parent or adjusting the layout, you can use custom logic to handle these events.
+---
+To handle expanding vertices that contain embedded graphs in maxGraph while maintaining the user-defined layout and preventing overlap, you can follow a semi-manual approach that adjusts the graph incrementally when vertices expand, without using the full auto-layout feature. Here's a strategy to achieve this:
+
+1. Track User-Defined Layout:
+Ensure that each vertex has an initial user-defined position that you can store and retrieve. You'll want to keep these coordinates as your baseline to maintain the user's layout as much as possible.
+
+2. Manually Expand the Vertices:
+When a vertex is expanded to show its embedded graph, you can dynamically adjust the size of that vertex (making it larger). As this happens, the embedded graph's nodes should be placed inside the vertex, respecting the user-defined layout.
+
+3. Detect Overlaps Manually:
+After expanding, you can check for overlaps using simple geometric rules:
+
+Check whether the expanded vertex intersects with nearby vertices.
+For this, calculate the bounding box of each expanded vertex and see if any other vertex overlaps with it.
+4. Shift Nearby Vertices:
+If an overlap is detected, manually shift the overlapping vertices and their connected edges. Here's how you can do this:
+
+Move overlapping vertices only enough to prevent the overlap, while maintaining relative positioning as much as possible.
+Ensure that this movement is incremental and minimal, to preserve the original user layout.
+You can use the getBoundingBox() method to retrieve the bounding boxes of vertices and calculate the necessary adjustments.
+
+5. Preserve Connectivity:
+After adjusting vertices to prevent overlap, update the edges connecting the vertices to ensure that connections remain visually clear. You may want to reroute the edges slightly if vertices have moved, but avoid fully recalculating edge paths to maintain user-defined routes.
+
+6. Consider Manual Expansion Logic:
+If vertices have multiple levels of depth, expand them level by level as the user navigates. Each time a deeper level is expanded, repeat the overlap detection and adjust nearby vertices, ensuring no conflicts arise.
+
+Sample Approach (Pseudo-Code):
+javascript
+Copy code
+function expandVertex(vertex) {
+  // Expand the size of the vertex to fit the embedded graph
+  let embeddedGraph = getEmbeddedGraph(vertex);
+  resizeVertexToFitEmbeddedGraph(vertex, embeddedGraph);
+
+  // Check for overlap with nearby vertices
+  let expandedBBox = graph.getBoundingBox(vertex);
+  let vertices = graph.getAllVertices();
+
+  for (let otherVertex of vertices) {
+    if (otherVertex !== vertex) {
+      let otherBBox = graph.getBoundingBox(otherVertex);
+
+      // Detect if bounding boxes overlap
+      if (boundingBoxesOverlap(expandedBBox, otherBBox)) {
+        // Shift the overlapping vertex
+        shiftVertexToAvoidOverlap(otherVertex, expandedBBox);
+      }
+    }
+  }
+
+  // Optionally reroute edges after shifting vertices
+  rerouteEdgesIfNecessary();
+}
+7. Incremental Adjustments:
+Expand vertices one step at a time, and allow the user to visually adjust things if necessary. This gives the user control over how much detail they see without fully invoking auto-layout, which may disrupt the manual arrangement.
+
+This approach avoids a heavy auto-layout recalculation and provides more control over the process.
+

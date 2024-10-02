@@ -1,0 +1,24 @@
+/*.flow {*/
+
+/*.radiating-spot {*/
+/*  stroke: gold; !* Color of the radiating spot *!*/
+/*  stroke-width: 8; !* Thickness of the spot (can be adjusted) *!*/
+/*  stroke-linecap: round; !* Makes the ends of the stroke rounded *!*/
+/*  stroke-dasharray: 1, 500; !* Dash pattern with a short segment *!*/
+/*  stroke-dashoffset: 100%;*/
+/*  animation: radiate 3s infinite linear; !* Animation runs continuously *!*/
+/*  filter: drop-shadow(0 0 8px gold); !* Glowing effect *!*/
+/*}*/
+
+#ball {
+  position: absolute;
+  width: 15px; /* Width of the ball */
+  height: 15px; /* Height of the ball */
+  background-color: #26cc00; /* Color of the ball */
+  border-radius: 50%; /* Makes the div element a circle */
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%); /* Centers the ball at the exact coordinate */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Optional: Adds a shadow for a 3D effect */
+  display: none;
+}

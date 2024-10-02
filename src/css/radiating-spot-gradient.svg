@@ -1,0 +1,9 @@
+<svg width="0" height="0">
+    <defs>
+        <linearGradient id="gold-gradient" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="yellow"/>
+            <stop offset="50%" stop-color="gold"/>
+            <stop offset="100%" stop-color="orange"/>
+        </linearGradient>
+    </defs>
+</svg>
