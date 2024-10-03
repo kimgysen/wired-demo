@@ -49,7 +49,8 @@ export const exampleFlowJson: KpFlow = {
 			},
 			data: {
 				method: 'input',
-				script: '/scripts/input.ts'
+				name: 'input',
+				script: '/demo/scripts/input.ts'
 			}
 		},
 		{
@@ -63,7 +64,7 @@ export const exampleFlowJson: KpFlow = {
 			data: {
 				name: 'orderApi',
 				method: 'getOrdersFromApi',
-				script: '/scripts/apiClient.ts'
+				script: '/demo/scripts/apiClient.ts'
 			}
 		},
 		{
@@ -77,7 +78,7 @@ export const exampleFlowJson: KpFlow = {
 			data: {
 				name: 'orderMapper',
 				method: 'mapOrdersToProducts',
-				script: '/scripts/mapper.ts'
+				script: '/demo/scripts/mapper.ts'
 			}
 		},
 		{
@@ -91,7 +92,7 @@ export const exampleFlowJson: KpFlow = {
 			data: {
 				name: 'orderFilter',
 				method: 'filterBooks',
-				script: '/scripts/filter.ts'
+				script: '/demo/scripts/filter.ts'
 			}
 		},
 		{
@@ -105,8 +106,9 @@ export const exampleFlowJson: KpFlow = {
 				height: 30
 			},
 			data: {
+				name: 'output',
 				method: 'output',
-				script: '/scripts/output.ts'
+				script: '/demo/scripts/output.ts'
 			}
 		}
 	],

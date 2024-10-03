@@ -1,10 +1,74 @@
 import esbuild from 'esbuild-wasm';
 import {readFile} from "./idb-fs.ts";
 
+(async() => {
+	await init();
+
+})();
+
+async function init() {
+	if (!esbuild) {
+		throw new Error('esbuild not loaded');
+	}
+	await esbuild.initialize({
+		wasmURL: 'https://cdn.jsdelivr.net/npm/esbuild-wasm@latest/esbuild.wasm',
+	});
+}
+
 const loadScript = async (filePath) => {
 	return readFile(filePath); // Your custom IndexedDB logic
 
 };
+
+// Create a custom plugin to load files from the virtual filesystem
+export const buildVirtualFileSystemPlugin = (dependencies) => {
+	return {
+		name: 'virtual-filesystem',
+		setup(build) {
+			// Dynamically resolve dependencies based on the provided dependency list
+			build.onResolve({filter: /.*/}, (args) => {
+				const dep = dependencies[args.path];
+
+				// Check if the requested path matches one of the dependencies
+				if (dep) {
+					// Dynamically extract the file extension (e.g., .ts, .js, etc.)
+					const extMatch = dep.match(/\.(\w+)$/);
+					const ext = extMatch ? extMatch[1] : null;
+
+					// Ensure the file has a valid extension
+					if (ext) {
+						return {path: `/virtual/${args.path}`, namespace: 'virtual', pluginData: {ext}};
+					}
+				}
+
+				// Return null for non-virtual files so that esBuild can handle them normally
+				return null;
+			});
+
+			// Dynamically load the file contents for virtual files
+			build.onLoad({filter: /.*/, namespace: 'virtual'}, async (args) => {
+				console.log('onLoad', args);
+				// Extract the file extension from the pluginData set in onResolve
+				const ext = args.pluginData?.ext || 'js';  // Default to 'js' if none found
+
+				// Get the requested module's name from the path
+				const moduleName = args.path.replace('/virtual/', '');
+
+				// Load the module content from the virtual filesystem (e.g., IndexedDB)
+				if (dependencies[moduleName]) {
+					console.log('dependency', dependencies[moduleName]);
+					const moduleContent = await loadScript(dependencies[moduleName]);
+
+					// Return the contents with the appropriate loader based on the extension
+					return {contents: moduleContent, loader: ext};
+				}
+
+				// If the file wasn't found, return an empty result (though this shouldn't happen)
+				return {contents: ''};
+			});
+		}
+	}
+}
 
 // Create a custom plugin to load files from the virtual filesystem
 const virtualFileSystemPlugin = {
@@ -49,27 +113,25 @@ const virtualFileSystemPlugin = {
 };
 
 
-export const initEsBuild = () => {
+export const initEsBuild = (script: string, plugin = virtualFileSystemPlugin) => {
 	document.getElementById('btn-es-build').addEventListener('click', async () => {
-		const module = await runEsBuild();
-		const res = module.mapNumbers([1, 2, 3, 4]); // Call your function
+		const module = await runEsBuild(script, plugin);
+
+		const res = module['mapNumbers']([1, 2, 3, 4]); // Call your function
 		// console.log(`${helloMessage}`);
 		console.log(`Mapped numbers: ${res}`);
 	});
 
 }
 
-export async function runEsBuild() {
-	await init();
-
+export async function runEsBuild(script: string, plugin) {
 	console.log('Bundling...');
-
 	// Run esbuild with the plugin and bundle everything
 	const result = await esbuild.build({
-		entryPoints: ['myModule.ts'],  // Entry point is the TypeScript file
+		entryPoints: [script],  // Entry point is the TypeScript file
 		bundle: true,
 		format: 'esm',
-		plugins: [virtualFileSystemPlugin],
+		plugins: [plugin],
 		write: false,
 	});
 
@@ -82,13 +144,4 @@ export async function runEsBuild() {
 	return import(url);
 
 
-}
-
-async function init() {
-	if (!esbuild) {
-		throw new Error('esbuild not loaded');
-	}
-	await esbuild.initialize({
-		wasmURL: 'https://cdn.jsdelivr.net/npm/esbuild-wasm@latest/esbuild.wasm',
-	});
 }

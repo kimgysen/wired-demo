@@ -1,8 +1,6 @@
-import {from} from 'rxjs';
 import {exampleFlowJson, KpFlow} from "./flow-example.ts";
 import {readScript} from "./scripts-util.ts";
-import {loadFunctionFromModuleWithDeps} from "./ts-compiler2.ts";
-import {loadModuleFromVirtualFS} from "./npm/import-module.ts";
+import {buildVirtualFileSystemPlugin, runEsBuild} from "./npm/es-build.ts";
 
 // Vertex interface with a function that takes input from the previous result
 export interface PipelineVertex {
@@ -77,7 +75,7 @@ class Pipeline {
 // };
 
 const applyType = (type: string, fn: Function, ...ars) => {
-	switch(type) {
+	switch (type) {
 		case 'mapper':
 			return
 			break;
@@ -91,19 +89,36 @@ export const mapFlowToPipeline = (flow: KpFlow, timeout: number): PipelineVertex
 				setTimeout(async () => {
 					const jsModule = readScript(v.data.script);
 
+					const dependencies = {
+						'lodash': '/demo/node_modules/lodash/lodash.js',
+						'input': "/demo/scripts/input.ts",
+						'orderApi': '/demo/scripts/apiClient.ts',
+						'orderMapper': '/demo/scripts/mapper.ts',
+						'orderFilter': '/demo/scripts/filter.ts',
+						'output': '/demo/scripts/output.ts',
+					};
+
+
 					try {
 						const imports = {};
 						// const res = await createWorkerFromCode(jsModule, imports, v.data.method, [input]);
 						// const fn = await loadFunctionFromModuleWithDeps(jsModule, {'helper': helperCode}, 'myFilter')
-						const lodashCode = await loadModuleFromVirtualFS('demo', 'lodash');
-						const dependencies = {
-							'lodash': lodashCode, // Ensure lodash is treated as a dependency
-						};
-						const fn = await loadFunctionFromModuleWithDeps(jsModule, dependencies, v.data.method);
-						console.log('input', input);
-						console.log('fn', fn);
-						const res = fn.call(null, input);
+						// const lodashCode = await loadModuleFromVirtualFS('demo', 'lodash');
+						// const dependencies = {
+						// 	'lodash': lodashCode, // Ensure lodash is treated as a dependency
+						// };
+						// const fn = await loadFunctionFromModuleWithDeps(jsModule, dependencies, v.data.method);
+						//
+						// console.log('input', input);
+						// console.log('fn', fn);
+						// const res = fn.call(null, input);
+						// console.log('res', res);
+						const plugin = buildVirtualFileSystemPlugin(dependencies);
+						const module = await runEsBuild(v.data.name, plugin);
+						const res = module[v.data.method](input);
+
 						console.log('res', res);
+
 						resolve(res);
 
 					} catch (e) {
